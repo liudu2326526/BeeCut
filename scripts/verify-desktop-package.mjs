@@ -14,8 +14,8 @@ const exec = promisify(execFile);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const metadata = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'));
 const release = path.join(root, 'release');
-const app = path.join(release, '微剪.app');
-const zip = path.join(release, `微剪-${metadata.version}-mac-arm64.zip`);
+const app = path.join(release, 'BeeCut.app');
+const zip = path.join(release, `BeeCut-${metadata.version}-mac-arm64.zip`);
 const reportPath = path.join(release, `independent-package-verification-${metadata.version}.json`);
 const report = { version: metadata.version, startedAt: new Date().toISOString(), app, zip, stages: [] };
 const hash = async filename => {
@@ -72,6 +72,8 @@ async function verify() {
   assert.equal(process.platform, 'darwin');
   assert.equal(process.arch, 'arm64');
   assert.equal(await plist('CFBundleIdentifier'), 'com.weijian.studio');
+  assert.equal(await plist('CFBundleDisplayName'), 'BeeCut');
+  assert.equal(await plist('CFBundleExecutable'), 'BeeCut');
   assert.equal(await plist('CFBundleShortVersionString'), metadata.version);
   assert.equal(await plist('LSMinimumSystemVersion'), '13.0');
   const signature = await command('/usr/bin/codesign', ['--verify', '--deep', '--strict', '--verbose=2', app]);
@@ -129,6 +131,8 @@ async function verify() {
     assert.ok(!inside.split('/').some(part => part.startsWith('.') || part.endsWith('~')), `Hidden/backup file in package: ${relative}`);
   }
   const packagedMetadata = JSON.parse(extractFile(archive, 'package.json').toString('utf8'));
+  assert.equal(packagedMetadata.name, metadata.name);
+  assert.equal(packagedMetadata.productName, 'BeeCut');
   assert.equal(packagedMetadata.version, metadata.version);
   assert.equal(packagedMetadata.main, 'main.mjs');
   assert.deepEqual(Object.keys(packagedMetadata.dependencies).sort(), nativePackages.sort());
@@ -214,7 +218,7 @@ async function verify() {
   assert.equal(await hash(path.join(licenseDir, 'rubberband', path.basename(helperLock.sourceArchive))), helperLock.sha256, 'Shipped upstream source identity differs from the lock');
   assert.match(await fs.readFile(path.join(licenseDir, 'rubberband/LICENSE.rubberband'), 'utf8'), /GNU GENERAL PUBLIC LICENSE/);
   nativeTools.audioHelper = { path: helper, version: helperVersion, sha256: await hash(helper), unsignedExecutableSha256: helperCodeHash, architecture: helperInfo.trim(), dependencies: helperDependencies, upstreamVersion: helperLock.version, upstreamSourceSha256: helperLock.sha256 };
-  const executable = path.join(app, 'Contents/MacOS/微剪');
+  const executable = path.join(app, 'Contents/MacOS/BeeCut');
   const runtime = JSON.parse(await command(executable, ['-e', 'process.stdout.write(JSON.stringify({node:process.versions.node,electron:process.versions.electron,chrome:process.versions.chrome,arch:process.arch}))'], { env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' } }));
   assert.equal(runtime.arch, 'arm64');
   assert.equal(runtime.electron, JSON.parse(await fs.readFile(path.join(root, 'node_modules/electron/package.json'), 'utf8')).version);
@@ -225,8 +229,8 @@ async function verify() {
   const extraction = await fs.mkdtemp(path.join(release, '.independent-verify-'));
   try {
     await command('/usr/bin/ditto', ['-x', '-k', zip, extraction]);
-    report.extractedSignature = (await command('/usr/bin/codesign', ['--verify', '--deep', '--strict', '--verbose=2', path.join(extraction, '微剪.app')])).trim();
-    assert.deepEqual(await manifest(path.join(extraction, '微剪.app')), allEntries, 'ZIP extraction differs from finalized signed app');
+    report.extractedSignature = (await command('/usr/bin/codesign', ['--verify', '--deep', '--strict', '--verbose=2', path.join(extraction, 'BeeCut.app')])).trim();
+    assert.deepEqual(await manifest(path.join(extraction, 'BeeCut.app')), allEntries, 'ZIP extraction differs from finalized signed app');
   } finally { await fs.rm(extraction, { recursive: true, force: true }); }
   const sha256 = await hash(zip);
   assert.equal(await fs.readFile(`${zip}.sha256`, 'utf8'), `${sha256}  ${path.basename(zip)}\n`);

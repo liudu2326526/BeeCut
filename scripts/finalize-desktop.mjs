@@ -9,8 +9,8 @@ import { listPackage, getRawHeader } from '@electron/asar';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const metadata = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'));
 const release = path.join(root, 'release');
-const app = path.join(release, '微剪.app');
-const source = path.join(release, 'mac-arm64/微剪.app');
+const app = path.join(release, 'BeeCut.app');
+const source = path.join(release, 'mac-arm64/BeeCut.app');
 const run = (command, args) => { const result = spawnSync(command, args, { encoding: 'utf8' }); if (result.status !== 0) throw new Error(`${command} failed: ${result.stdout}\n${result.stderr}`); return result.stdout + result.stderr; };
 const archiveFiles = listPackage(path.join(source, 'Contents/Resources/app.asar'));
 const unexpectedFiles = archiveFiles.filter(file => /(?:^|\/)(data|artifacts|exports|work|src|\.cache|\.env)(?:\/|$)|~$/.test(file));
@@ -30,12 +30,12 @@ for (const filename of [path.join(unpacked, '@ffmpeg-installer/darwin-arm64/ffmp
 // Sign the enclosing bundle after the shipped command line executables.
 run('/usr/bin/codesign', ['--force', '--deep', '--sign', '-', app]);
 const signature = run('/usr/bin/codesign', ['--verify', '--deep', '--strict', '--verbose=2', app]);
-const zip = path.join(release, `微剪-${metadata.version}-mac-arm64.zip`);
+const zip = path.join(release, `BeeCut-${metadata.version}-mac-arm64.zip`);
 await fs.rm(zip, { force: true });
 run('/usr/bin/ditto', ['-c', '-k', '--sequesterRsrc', '--keepParent', app, zip]);
 const verification = await fs.mkdtemp(path.join(release, '.verify-'));
 let extractedSignature;
-try { run('/usr/bin/ditto', ['-x', '-k', zip, verification]); extractedSignature = run('/usr/bin/codesign', ['--verify', '--deep', '--strict', '--verbose=2', path.join(verification, '微剪.app')]); }
+try { run('/usr/bin/ditto', ['-x', '-k', zip, verification]); extractedSignature = run('/usr/bin/codesign', ['--verify', '--deep', '--strict', '--verbose=2', path.join(verification, 'BeeCut.app')]); }
 finally { await fs.rm(verification, { recursive: true, force: true }); }
 const hash = createHash('sha256');
 for await (const chunk of createReadStream(zip)) hash.update(chunk);

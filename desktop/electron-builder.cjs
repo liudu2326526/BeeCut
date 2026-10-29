@@ -1,6 +1,6 @@
 module.exports = {
   appId: 'com.weijian.studio',
-  productName: '微剪',
+  productName: 'BeeCut',
   directories: { app: '.desktop-build/app', output: 'release', buildResources: 'desktop/assets' },
   files: ['**/*', '!**/.DS_Store'],
   asar: true,
@@ -22,6 +22,6 @@ module.exports = {
     hardenedRuntime: false,
     gatekeeperAssess: false,
     minimumSystemVersion: '13.0',
-    extendInfo: { CFBundleDisplayName: '微剪', NSHumanReadableCopyright: '微剪 · 本地视频编辑工作台', NSHighResolutionCapable: true },
+    extendInfo: { CFBundleDisplayName: 'BeeCut', NSHumanReadableCopyright: 'BeeCut · 本地视频编辑工作台', NSHighResolutionCapable: true },
   },
 };

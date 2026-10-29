@@ -8,11 +8,11 @@ import { createAudioHost } from './audio-host.mjs';
 import { createDraftImportAccess } from './draft-import-access.mjs';
 import { fileURLToPath } from 'node:url';
 
-app.setName('微剪');
+app.setName('BeeCut');
 app.setAppUserModelId('com.weijian.studio');
 // Match the editor's fixed dark workspace, including native frames and dialogs.
 nativeTheme.themeSource = 'dark';
-// Keep the desktop library independent of both the web checkout and app bundle.
+// Preserve the existing library and single-instance identity across the BeeCut rename.
 app.setPath('userData', path.join(app.getPath('appData'), '微剪'));
 
 let mainWindow, server, queue, origin, runtimeFile, audioHost;
@@ -41,7 +41,7 @@ function protectWindow(window, acceptsNavigation) {
 
 function showPreview(url) {
   if (previews.size >= 2) { const previous = previews.values().next().value; previous.close(); }
-  const window = new BrowserWindow({ width: 1100, height: 720, title: '微剪 · 成片预览', backgroundColor: '#111111', webPreferences: preferences });
+  const window = new BrowserWindow({ width: 1100, height: 720, title: 'BeeCut · 成片预览', backgroundColor: '#111111', webPreferences: preferences });
   previews.add(window);
   window.on('closed', () => previews.delete(window));
   protectWindow(window, candidate => candidate === url);
@@ -61,7 +61,7 @@ async function saveCurrentProject() {
 
 async function createWindow() {
   if (mainWindow && !mainWindow.isDestroyed()) { mainWindow.show(); mainWindow.focus(); return; }
-  mainWindow = new BrowserWindow({ width: 1480, height: 940, minWidth: 1060, minHeight: 700, title: '微剪 · 视频工作台', backgroundColor: '#171717', show: false, webPreferences: { ...preferences, preload: fileURLToPath(new URL('./preload.cjs', import.meta.url)) } });
+  mainWindow = new BrowserWindow({ width: 1480, height: 940, minWidth: 1060, minHeight: 700, title: 'BeeCut · 视频工作台', backgroundColor: '#171717', show: false, webPreferences: { ...preferences, preload: fileURLToPath(new URL('./preload.cjs', import.meta.url)) } });
   protectWindow(mainWindow, url => trustedUrl(url) && new URL(url).pathname === '/');
   mainWindow.webContents.setWindowOpenHandler(({ url }) => { if (exportUrl(url)) showPreview(url); return { action: 'deny' }; });
   mainWindow.webContents.on('will-prevent-unload', event => {
@@ -79,7 +79,7 @@ async function createWindow() {
 
 function installMenu(dataDir, exportDir) {
   Menu.setApplicationMenu(Menu.buildFromTemplate([
-    { label: '微剪', submenu: [{ role: 'about', label: '关于微剪' }, { type: 'separator' }, { role: 'hide', label: '隐藏微剪' }, { role: 'hideOthers', label: '隐藏其他' }, { role: 'unhide', label: '全部显示' }, { type: 'separator' }, { role: 'quit', label: '退出微剪' }] },
+    { label: 'BeeCut', submenu: [{ role: 'about', label: '关于 BeeCut' }, { type: 'separator' }, { role: 'hide', label: '隐藏 BeeCut' }, { role: 'hideOthers', label: '隐藏其他' }, { role: 'unhide', label: '全部显示' }, { type: 'separator' }, { role: 'quit', label: '退出 BeeCut' }] },
     { label: '文件', submenu: [
       { label: '导入剪映草稿…', click: () => mainWindow?.webContents.send('weijian:import-jianying') },
       { type: 'separator' },
@@ -88,9 +88,9 @@ function installMenu(dataDir, exportDir) {
       { role: 'close', label: '关闭窗口' },
       { type: 'separator' },
       { label: '导入旧网页版资料库…', click: async () => {
-        const selected = await dialog.showOpenDialog(mainWindow, { title: '选择旧版本的 data 资料库文件夹', properties: ['openDirectory'], message: '导入素材与工程副本，原文件夹保持不变。完成后微剪会重新启动。' });
+        const selected = await dialog.showOpenDialog(mainWindow, { title: '选择旧版本的 data 资料库文件夹', properties: ['openDirectory'], message: '导入素材与工程副本，原文件夹保持不变。完成后 BeeCut 会重新启动。' });
         if (selected.canceled) return;
-        const answer = await dialog.showMessageBox(mainWindow, { type: 'question', title: '导入旧版本资料库', message: '导入所选资料库并重新启动微剪？', detail: '先保存当前工程。导入前会备份桌面资料库，不会改写旧版本文件夹。', buttons: ['取消', '导入并重启'], defaultId: 0, cancelId: 0 });
+        const answer = await dialog.showMessageBox(mainWindow, { type: 'question', title: '导入旧版本资料库', message: '导入所选资料库并重新启动 BeeCut？', detail: '先保存当前工程。导入前会备份桌面资料库，不会改写旧版本文件夹。', buttons: ['取消', '导入并重启'], defaultId: 0, cancelId: 0 });
         if (answer.response !== 1) return;
         let engineStopped = false;
         mainWindow.setEnabled(false);
@@ -129,8 +129,8 @@ async function shutdown() {
     // Keep the process and service owner alive so a later quit can retry its
     // failed cleanup; do not report completion while it still owns resources.
     shuttingDown = false;
-    console.error('微剪关闭清理失败', error);
-    dialog.showErrorBox('退出尚未完成', `${error.message}\n请再次选择“退出微剪”重试清理。资料库和恢复记录已保留。`);
+    console.error('BeeCut 关闭清理失败', error);
+    dialog.showErrorBox('退出尚未完成', `${error.message}\n请再次选择“退出 BeeCut”重试清理。资料库和恢复记录已保留。`);
   }
 }
 
@@ -158,7 +158,7 @@ if (hasLock) {
     };
     ipcMain.handle('weijian:choose-jianying-draft', async event => {
       trustedChooser(event);
-      const selected = await dialog.showOpenDialog(mainWindow, { title: '选择剪映草稿文件夹', message: '只读预检草稿。确认导入后会复制成独立微剪工程，不改写原草稿。', properties: ['openDirectory'] });
+      const selected = await dialog.showOpenDialog(mainWindow, { title: '选择剪映草稿文件夹', message: '只读预检草稿。确认导入后会复制成独立 BeeCut 工程，不改写原草稿。', properties: ['openDirectory'] });
       if (selected.canceled || !selected.filePaths.length) return { canceled: true };
       trustedChooser(event);
       const directory = selected.filePaths[0];
@@ -180,7 +180,7 @@ if (hasLock) {
     });
     runtimeFile = path.join(app.getPath('userData'), 'runtime.json');
     await fs.writeFile(runtimeFile, JSON.stringify({ instanceId, pid: process.pid, origin, dataDir, appVersion: app.getVersion(), startedAt: new Date().toISOString() }, null, 2));
-    const exportDir = path.join(app.getPath('videos'), '微剪导出');
+    const exportDir = path.join(app.getPath('videos'), 'BeeCut导出');
     await fs.mkdir(exportDir, { recursive: true });
     session.defaultSession.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
     session.defaultSession.setPermissionCheckHandler(() => false);
@@ -195,6 +195,6 @@ if (hasLock) {
     audioHost = createAudioHost({ getWindow: () => mainWindow, origin, exportDir });
     installMenu(dataDir, exportDir);
     await createWindow();
-    console.log(`微剪桌面版 ready ${origin}`);
-  }).catch(async error => { dialog.showErrorBox('微剪启动失败', error.message); await shutdown(); });
+    console.log(`BeeCut 桌面版 ready ${origin}`);
+  }).catch(async error => { dialog.showErrorBox('BeeCut 启动失败', error.message); await shutdown(); });
 }

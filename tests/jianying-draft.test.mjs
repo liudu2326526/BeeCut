@@ -149,7 +149,7 @@ test('microsecond boundaries retain timing to less than one 48kHz sample and tar
 });
 
 test('pinned public producer template establishes a real readable empty schema; not native app interoperability', async () => {
-  const path = new URL('../artifacts/v11-20261022/schema/upstream/pyJianYingDraft__assets__draft_content_template.json', import.meta.url);
+  const path = new URL('./fixtures/pyJianYingDraft/draft_content_template.json', import.meta.url);
   const template = JSON.parse(await readFile(path, 'utf8')), out = inspect(template);
   assert.equal(out.profile, JIANYING_DRAFT_PROFILE);
   assert.equal(out.canImport, true, JSON.stringify(out.issues));

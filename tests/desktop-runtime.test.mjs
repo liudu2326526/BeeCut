@@ -18,7 +18,15 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 async function sourceSnapshot(dir, prefix = '') {
   const result = {};
-  for (const entry of await readdir(dir, { withFileTypes: true })) {
+  let entries;
+  try { entries = await readdir(dir, { withFileTypes: true }); }
+  catch (error) {
+    // A clean clone has no web library. Keep absence distinct from an empty
+    // directory, and still fail on missing children or other filesystem errors.
+    if (error.code === 'ENOENT' && prefix === '' && dir === path.join(root, 'data')) return null;
+    throw error;
+  }
+  for (const entry of entries) {
     const relative = path.join(prefix, entry.name);
     const filename = path.join(dir, entry.name);
     if (entry.isDirectory()) Object.assign(result, await sourceSnapshot(filename, relative));

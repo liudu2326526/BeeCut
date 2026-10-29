@@ -11,8 +11,8 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const metadata = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'));
 const exec = promisify(execFile);
-const installed = path.join(homedir(), 'Applications/微剪.app');
-const released = path.join(root, 'release/微剪.app');
+const installed = path.join(homedir(), 'Applications/BeeCut.app');
+const released = path.join(root, 'release/BeeCut.app');
 const output = path.resolve(process.argv[2] || path.join(root, `artifacts/installed-${metadata.version}`));
 await fs.mkdir(output, { recursive: true });
 const sha = async filename => {

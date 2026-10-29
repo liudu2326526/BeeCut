@@ -254,7 +254,7 @@ export async function createApp({ dataDir = process.env.DATA_DIR || path.join(pr
       const clientPage = req.method === 'GET' && req.accepts('html') && !path.extname(req.path)
         && !segments.some(segment => segment.startsWith('.')) && !assetDirectories.has(segments[0]);
       if (!clientPage) return next();
-      res.sendFile(path.join(clientDir, 'index.html'), error => { if (error) next(error); });
+      res.sendFile('index.html', { root: clientDir, dotfiles: 'deny' }, error => { if (error) next(error); });
     });
   }
   app.use((_req, res) => res.status(404).json({ error: '请求的本地资源不存在' }));

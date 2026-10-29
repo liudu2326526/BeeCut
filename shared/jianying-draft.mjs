@@ -68,7 +68,7 @@ export function inspectJianyingDraft(input, { name } = {}) {
   }
   const number = (value, min, max, path, label, integer = false) => {
     if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max || (integer && !Number.isSafeInteger(value))) {
-      issue('error', 'VALUE_OUT_OF_RANGE', `${label} 无效或超出微剪可表示范围 ${min}–${max}`, path); return null;
+      issue('error', 'VALUE_OUT_OF_RANGE', `${label} 无效或超出 BeeCut 可表示范围 ${min}–${max}`, path); return null;
     }
     return value;
   };
@@ -165,7 +165,7 @@ export function inspectJianyingDraft(input, { name } = {}) {
       if (!Number.isSafeInteger(attribute) || ![0, 1].includes(attribute)) issue('error', 'UNSUPPORTED_TRACK_ATTRIBUTE', '不支持的轨道属性标记', `${tp}/attribute`);
       if (own(track, 'attribute')) consume(`${tp}/attribute`, 'bit0 为轨道静音；视频映射到片段 muted，音频映射到 audioLanes');
       const lane = track.type === 'text' ? null : segments.length ? lanes[track.type]++ : null;
-      if (lane !== null && lane >= 4) issue('error', 'TRACK_CAPACITY', `${track.type === 'video' ? '画面' : '音频'}轨道超过微剪当前 4 层上限；不静默压平`, tp);
+      if (lane !== null && lane >= 4) issue('error', 'TRACK_CAPACITY', `${track.type === 'video' ? '画面' : '音频'}轨道超过 BeeCut 当前 4 层上限；不静默压平`, tp);
       if (track.type === 'audio' && lane < 4 && lane !== null) out.audioLanes[lane].muted = attribute === 1;
       if (track.type === 'text' && attribute === 1 && segments.length) issue('error', 'UNSUPPORTED_TEXT_TRACK_ATTRIBUTE', '隐藏/静音的文字轨道不能映射为可见字幕', `${tp}/attribute`);
       const videoIntervals = [];
@@ -221,9 +221,9 @@ export function inspectJianyingDraft(input, { name } = {}) {
             const q = extra.sourcePath;
             if (extra.raw.fade_type !== 0) unsupported(`${q}/fade_type`, '仅支持 fade_type=0 的线性音量淡化', 'UNSUPPORTED_FADE', 'error');
             else consume(`${q}/fade_type`);
-            const fadeLoss = '保留淡化时长，使用微剪线性幅度曲线；剪映原始淡化算法尚未做原生对照';
-            fadeIn = map(`${q}/fade_in_duration`, `${target}/fadeIn`, us(extra.raw.fade_in_duration, `${q}/fade_in_duration`, '音频淡入'), '整数微秒转换为秒；映射为微剪线性淡入', fadeLoss);
-            fadeOut = map(`${q}/fade_out_duration`, `${target}/fadeOut`, us(extra.raw.fade_out_duration, `${q}/fade_out_duration`, '音频淡出'), '整数微秒转换为秒；映射为微剪线性淡出', fadeLoss);
+            const fadeLoss = '保留淡化时长，使用 BeeCut 线性幅度曲线；剪映原始淡化算法尚未做原生对照';
+            fadeIn = map(`${q}/fade_in_duration`, `${target}/fadeIn`, us(extra.raw.fade_in_duration, `${q}/fade_in_duration`, '音频淡入'), '整数微秒转换为秒；映射为 BeeCut 线性淡入', fadeLoss);
+            fadeOut = map(`${q}/fade_out_duration`, `${target}/fadeOut`, us(extra.raw.fade_out_duration, `${q}/fade_out_duration`, '音频淡出'), '整数微秒转换为秒；映射为 BeeCut 线性淡出', fadeLoss);
             if (fadeIn > 0 || fadeOut > 0) issue('warning', 'FADE_LAW_APPROXIMATED', fadeLoss, q);
             if (fadeIn + fadeOut > duration + 1e-9) issue('error', 'INVALID_FADE_RANGE', '音频淡入淡出之和超过片段时长', q);
             if (own(extra.raw, 'type')) consume(`${q}/type`);
@@ -236,8 +236,8 @@ export function inspectJianyingDraft(input, { name } = {}) {
           if (!plain(content) || typeof content.text !== 'string' || !content.text.trim() || content.text.length > 2000 || content.text.includes('\0')) { issue('error', 'INVALID_SUBTITLE', '字幕文字为空、超长或无效', `${material.sourcePath}/content`); continue; }
           subtitleChars += content.text.length;
           if (out.subtitles.length >= 120 || subtitleChars > 30000) { issue('error', 'SUBTITLE_CAPACITY', '字幕超过 120 条或总计 30000 字符，不截断', p); continue; }
-          map(`${material.sourcePath}/content`, `${target}/text`, content.text, '解析 content.text 为可编辑纯文本；不执行文字内容', '字号、字体、样式、位置、透明度及动画统一替换为微剪底部白字默认样式');
-          issue('warning', 'TEXT_STYLE_REPLACED', '字幕保留可编辑纯文本和时间；字体、样式及自由位置替换为微剪默认底部字幕', `${material.sourcePath}/content`);
+          map(`${material.sourcePath}/content`, `${target}/text`, content.text, '解析 content.text 为可编辑纯文本；不执行文字内容', '字号、字体、样式、位置、透明度及动画统一替换为 BeeCut 底部白字默认样式');
+          issue('warning', 'TEXT_STYLE_REPLACED', '字幕保留可编辑纯文本和时间；字体、样式及自由位置替换为 BeeCut 默认底部字幕', `${material.sourcePath}/content`);
           if (own(segment, 'clip')) consume(`${p}/clip`, '字幕使用固定底部位置；来源变换仅存入报告', '未保留字幕自由位置或缩放');
           if (own(segment, 'uniform_scale')) consume(`${p}/uniform_scale`, '字幕使用默认样式');
           out.subtitles.push({ id: `jy-text-${trackIndex}-${segmentIndex}`, sourcePath: p, sourceMaterialId: material.id, text: content.text, start, duration, fontSize: 48, color: '#FFFFFF', position: 'bottom', outlineWidth: 2, outlineColor: '#000000' });
@@ -245,7 +245,7 @@ export function inspectJianyingDraft(input, { name } = {}) {
         }
         if (out.clips.length >= 64) { issue('error', 'CLIP_CAPACITY', '片段总数超过 64，不截断', p); continue; }
         const parsedSpeed = number(speed, .25, 4, `${p}/speed`, '恒定速度');
-        if (own(segment, 'speed')) map(`${p}/speed`, `${target}/speed`, parsedSpeed, '恒定速度倍率，限制取自微剪模型；超出时拒绝，不裁剪');
+        if (own(segment, 'speed')) map(`${p}/speed`, `${target}/speed`, parsedSpeed, '恒定速度倍率，限制取自 BeeCut 模型；超出时拒绝，不裁剪');
         let sourceStart = 0;
         if (material.kind === 'image') {
           if (segment.source_timerange !== undefined && segment.source_timerange !== null && (!plain(segment.source_timerange) || segment.source_timerange.start !== 0)) issue('error', 'INVALID_IMAGE_SOURCE_RANGE', '图片素材入点必须为 0', `${p}/source_timerange`);
@@ -260,11 +260,11 @@ export function inspectJianyingDraft(input, { name } = {}) {
           if (sourceStart !== null && sourceDuration !== null && typeof material.duration === 'number' && sourceStart + sourceDuration > material.duration + .000002001) issue('error', 'SOURCE_RANGE_OUTSIDE_MEDIA', '源出点超过草稿声明素材时长', `${p}/source_timerange`);
         }
         const volume = number(segment.volume ?? 1, 0, 2, `${p}/volume`, '基础音量');
-        if (own(segment, 'volume')) map(`${p}/volume`, `${target}/volume`, volume, '线性倍率直接保留；超过微剪 2 倍上限时拒绝');
+        if (own(segment, 'volume')) map(`${p}/volume`, `${target}/volume`, volume, '线性倍率直接保留；超过 BeeCut 2 倍上限时拒绝');
         if (own(segment, 'is_tone_modify')) {
           if (typeof segment.is_tone_modify !== 'boolean') issue('error', 'INVALID_BOOLEAN_FIELD', 'is_tone_modify 必须为布尔值', `${p}/is_tone_modify`);
-          else if (segment.is_tone_modify !== false && parsedSpeed !== 1) unsupported(`${p}/is_tone_modify`, '微剪恒定变速保持音高，不能复现变调播放', 'UNSUPPORTED_PITCH_MODE', 'error');
-          else consume(`${p}/is_tone_modify`, '微剪变速保持音高；1 倍速度时该项不影响声音');
+          else if (segment.is_tone_modify !== false && parsedSpeed !== 1) unsupported(`${p}/is_tone_modify`, 'BeeCut 恒定变速保持音高，不能复现变调播放', 'UNSUPPORTED_PITCH_MODE', 'error');
+          else consume(`${p}/is_tone_modify`, 'BeeCut 变速保持音高；1 倍速度时该项不影响声音');
         }
         let transform = { scale: 1, x: 0, y: 0, rotation: 0, opacity: 1, flipX: false, flipY: false };
         if (segment.clip !== undefined && segment.clip !== null) {
@@ -273,12 +273,12 @@ export function inspectJianyingDraft(input, { name } = {}) {
           else if (track.type === 'video') {
             for (const key of ['scale', 'transform', 'flip']) if (own(visual, key) && !plain(visual[key])) issue('error', 'INVALID_TRANSFORM', `clip.${key} 必须为对象`, `${p}/clip/${key}`);
             const sx = visual.scale?.x ?? 1, sy = visual.scale?.y ?? 1;
-            if (sx !== sy) unsupported(`${p}/clip/scale`, '微剪仅支持等比缩放，无法保持非等比画面比例', 'NON_UNIFORM_SCALE', 'error');
+            if (sx !== sy) unsupported(`${p}/clip/scale`, 'BeeCut 仅支持等比缩放，无法保持非等比画面比例', 'NON_UNIFORM_SCALE', 'error');
             else { transform.scale = number(sx, .1, 4, `${p}/clip/scale/x`, '等比缩放'); if (own(visual, 'scale')) consume(`${p}/clip/scale`, 'scale.x=scale.y 时直接映射等比缩放'); }
             const x = number(visual.transform?.x ?? 0, -4, 4, `${p}/clip/transform/x`, '水平归一化位置'), y = number(visual.transform?.y ?? 0, -4, 4, `${p}/clip/transform/y`, '垂直归一化位置');
             transform.x = x === null ? null : x * out.width / 2; transform.y = y === null ? null : -y * out.height / 2;
             if (visual.transform && own(visual.transform, 'x')) map(`${p}/clip/transform/x`, `${target}/transform/x`, transform.x, '剪映半画布宽度单位 × width/2 → 像素');
-            if (visual.transform && own(visual.transform, 'y')) map(`${p}/clip/transform/y`, `${target}/transform/y`, transform.y, '剪映向上为正；× -height/2 → 微剪向下为正的像素');
+            if (visual.transform && own(visual.transform, 'y')) map(`${p}/clip/transform/y`, `${target}/transform/y`, transform.y, '剪映向上为正；× -height/2 → BeeCut 向下为正的像素');
             for (const [source, targetKey, min, max] of [['rotation', 'rotation', -360, 360], ['alpha', 'opacity', 0, 1]]) {
               transform[targetKey] = number(visual[source] ?? (source === 'alpha' ? 1 : 0), min, max, `${p}/clip/${source}`, '画面变换');
               if (own(visual, source)) map(`${p}/clip/${source}`, `${target}/transform/${targetKey}`, transform[targetKey], source === 'rotation' ? '顺时针角度直接保留' : '不透明度直接保留');
@@ -314,7 +314,7 @@ export function inspectJianyingDraft(input, { name } = {}) {
         for (const [k, v] of Object.entries(value)) unconsumed(v, `${path}/${ptr(k)}`);
       } else if (path) {
         map(path, null, null, '未映射字段，来源值保留在报告', empty(value) ? undefined : '未导入该字段');
-        if (!empty(value)) issue('warning', 'UNSUPPORTED_FIELD', '该来源字段没有微剪映射；其值仅保留在报告', path);
+        if (!empty(value)) issue('warning', 'UNSUPPORTED_FIELD', '该来源字段没有 BeeCut 映射；其值仅保留在报告', path);
       }
     }
     unconsumed(doc, '');

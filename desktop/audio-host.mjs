@@ -20,7 +20,7 @@ export function createAudioHost({ getWindow, origin, exportDir, startupMs = 8000
   function start() {
     if (host || stopped) return;
     failure = null; born = lastBeat = Date.now(); ready = false;
-    const window = new BrowserWindow({ show: false, width: 320, height: 160, title: '微剪实时音频', webPreferences: { preload: path.join(directory, 'audio-host-preload.cjs'), partition: `weijian-audio-${randomUUID()}`, nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true, webviewTag: false, backgroundThrottling: false, autoplayPolicy: 'no-user-gesture-required' } });
+    const window = new BrowserWindow({ show: false, width: 320, height: 160, title: 'BeeCut 实时音频', webPreferences: { preload: path.join(directory, 'audio-host-preload.cjs'), partition: `weijian-audio-${randomUUID()}`, nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true, webviewTag: false, backgroundThrottling: false, autoplayPolicy: 'no-user-gesture-required' } });
     host = window;
     window.webContents.session.setPermissionRequestHandler((_c, _p, done) => done(false));
     window.webContents.session.setPermissionCheckHandler(() => false);
@@ -104,7 +104,7 @@ export function createAudioHost({ getWindow, origin, exportDir, startupMs = 8000
     if (!trustedMain(event)) throw new Error('不可信的录音调用来源');
     const completed = capture;
     if (!completed?.frames || !completed.completed) throw new Error('请先停止实时录制后再保存');
-    const result = await dialog.showSaveDialog(getWindow(), { title: '保存实时混音录制', defaultPath: path.join(exportDir, `微剪-实时混音-${Date.now()}.wav`), filters: [{ name: 'Float32 WAV', extensions: ['wav'] }] });
+    const result = await dialog.showSaveDialog(getWindow(), { title: '保存实时混音录制', defaultPath: path.join(exportDir, `BeeCut-实时混音-${Date.now()}.wav`), filters: [{ name: 'Float32 WAV', extensions: ['wav'] }] });
     if (result.canceled) return { cancelled: true };
     const wav = floatWav(completed.chunks, completed.frames);
     await fs.writeFile(result.filePath, wav);

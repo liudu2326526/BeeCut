@@ -959,7 +959,7 @@ export function App() {
     );
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${project.name}.weijian.json`;
+    a.download = `${project.name}.beecut.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
@@ -1055,7 +1055,7 @@ export function App() {
           </span>
           <span className="app-wordmark">
             <ScissorsIcon size={17} weight="bold" />
-            微剪<small>WORKSPACE</small>
+            BeeCut<small>WORKSPACE</small>
           </span>
         </div>
         <div className="project-title">

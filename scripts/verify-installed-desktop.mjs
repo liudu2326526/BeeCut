@@ -18,7 +18,7 @@ const option = (name, fallback) => {
 const packageMetadata = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'));
 const expectedVersion = option('version', packageMetadata.version);
 const date = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()).replaceAll('-', '');
-const appPath = path.resolve(option('app', path.join(homedir(), 'Applications', '微剪.app')));
+const appPath = path.resolve(option('app', path.join(homedir(), 'Applications', 'BeeCut.app')));
 const runtimeFile = path.resolve(option('runtime', path.join(homedir(), 'Library', 'Application Support', '微剪', 'runtime.json')));
 const artifacts = path.resolve(option('artifacts', path.join(root, 'artifacts', `mac-desktop-v${expectedVersion}-${date}`)));
 const projectName = option('project-name', `桌面包API验收-${expectedVersion}-${date}`);
@@ -36,7 +36,8 @@ async function verify() {
   assert.equal(url.hostname, '127.0.0.1');
   assert.equal(url.origin, runtime.origin);
   assert.ok(url.port && !['4173', '4318'].includes(url.port), 'The app must own its private dynamic port.');
-  const expectedExecutable = await fs.realpath(path.join(appPath, 'Contents', 'MacOS', '微剪'));
+  const executableName = (await exec('/usr/libexec/PlistBuddy', ['-c', 'Print :CFBundleExecutable', path.join(appPath, 'Contents', 'Info.plist')])).stdout.trim();
+  const expectedExecutable = await fs.realpath(path.join(appPath, 'Contents', 'MacOS', executableName));
   // BSD ps escapes non-ASCII process names under the C locale. Ask the producer
   // for UTF-8 rather than attempting to reinterpret its display escaping.
   const processPath = (await exec('/bin/ps', ['-ww', '-p', String(runtime.pid), '-o', 'comm='], { env: { ...process.env, LC_ALL: 'en_US.UTF-8' } })).stdout.trim();
@@ -110,7 +111,7 @@ async function verify() {
       { id: randomUUID(), mediaId: picture.id, track: 'video', start: 0, sourceStart: .1, duration: .7, speed: 1, volume: .25 },
       { id: randomUUID(), mediaId: picture.id, track: 'video', start: .7, sourceStart: 1, duration: .9, speed: 1, volume: .25 },
       { id: randomUUID(), mediaId: sound.id, track: 'audio', start: 0, sourceStart: 0, duration: 1.6, speed: 1, volume: .5 },
-    ], subtitles: [{ id: randomUUID(), text: '微剪桌面版 · 保存与导出验收', start: .1, duration: 1.4, fontSize: 14, color: '#FFFFFF', position: 'bottom' }],
+    ], subtitles: [{ id: randomUUID(), text: 'BeeCut 桌面版 · 保存与导出验收', start: .1, duration: 1.4, fontSize: 14, color: '#FFFFFF', position: 'bottom' }],
   };
   assert.equal(projectFilesBefore.includes(`${project.id}.json`), false);
   const saved = await post('/api/projects', project);

@@ -35,7 +35,7 @@ for (const name of nativePackages) {
     filter: sourcePath => { const relative = path.relative(source, sourcePath); return relative === '' || (allowed.has(relative.split(path.sep)[0]) && !relative.split(path.sep).some(part => part.startsWith('.') || part.endsWith('~'))); },
   });
 }
-await fs.writeFile(path.join(appDir, 'package.json'), JSON.stringify({ name: 'weijian-studio', productName: '微剪', version: packageJson.version, private: true, type: 'module', main: 'main.mjs', description: '本机视频编辑工作台', author: '微剪', dependencies }, null, 2));
+await fs.writeFile(path.join(appDir, 'package.json'), JSON.stringify({ name: packageJson.name, productName: 'BeeCut', version: packageJson.version, private: true, type: 'module', main: 'main.mjs', description: '本机视频编辑工作台', author: 'BeeCut', dependencies }, null, 2));
 await fs.cp(path.join(root, 'dist/client'), path.join(resources, 'ui'), { recursive: true, mode: constants.COPYFILE_FICLONE });
 
 // Use a strict allowlist from the demonstration project. No exports, work,
