@@ -1,0 +1,27 @@
+module.exports = {
+  appId: 'com.weijian.studio',
+  productName: '微剪',
+  directories: { app: '.desktop-build/app', output: 'release', buildResources: 'desktop/assets' },
+  files: ['**/*', '!**/.DS_Store'],
+  asar: true,
+  asarUnpack: ['node_modules/@ffmpeg-installer/darwin-arm64/ffmpeg', 'node_modules/@ffprobe-installer/darwin-arm64/ffprobe'],
+  extraResources: [
+    { from: '.desktop-build/resources/audio-helper', to: 'audio-helper' },
+    { from: '.desktop-build/resources/ui', to: 'ui' },
+    { from: '.desktop-build/resources/demo-library', to: 'demo-library' },
+    { from: '.desktop-build/resources/licenses', to: 'licenses' },
+  ],
+  npmRebuild: false,
+  electronDist: 'node_modules/electron/dist',
+  publish: null,
+  mac: {
+    target: [{ target: 'dir', arch: ['arm64'] }],
+    category: 'public.app-category.video',
+    icon: 'desktop/assets/icon.icns',
+    identity: '-',
+    hardenedRuntime: false,
+    gatekeeperAssess: false,
+    minimumSystemVersion: '13.0',
+    extendInfo: { CFBundleDisplayName: '微剪', NSHumanReadableCopyright: '微剪 · 本地视频编辑工作台', NSHighResolutionCapable: true },
+  },
+};

@@ -1,0 +1,21 @@
+.clip-waveform {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1px;
+  height: 11px;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  background: #153d37d9;
+  color: #87d7c8;
+}
+.clip-waveform.is-audio { top: 17px; bottom: 1px; height: auto; background: #204e3c; }
+.clip-waveform svg { position: absolute; top: 0; height: 100%; display: block; overflow: hidden; }
+.clip-waveform path { fill: none; stroke: currentColor; stroke-width: .7; }
+.clip-waveform line { stroke: currentColor; stroke-width: .6; opacity: .4; }
+.clip-waveform-label { position: absolute; inset: 0; display: flex; align-items: center; padding-left: 4px; font-size: 8px; line-height: 10px; white-space: nowrap; }
+.clip-waveform-no-audio { background: #173536; color: #859c99; }
+.clip-waveform-failed { color: #f5b5a9; background: #4c3531; }
+.clip-waveform-retry { border: 0; background: transparent; padding: 0 4px; color: inherit; font: 8px/10px system-ui,sans-serif; white-space: nowrap; cursor: pointer; pointer-events: auto; }
+.clip-waveform-retry:focus-visible { outline: 1px solid #fff; outline-offset: -1px; }

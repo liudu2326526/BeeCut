@@ -1,0 +1,39 @@
+{
+  "name": "jianying-studio",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "vite build && node scripts/prepare-sites-build.mjs",
+    "preview": "vite preview",
+    "test:sites": "node --test tests/sites-worker.test.mjs",
+    "dev:ui": "vite",
+    "start:server": "node server/index.mjs",
+    "demo": "node scripts/create-demo.mjs",
+    "test:editor": "node --test tests/model.test.mjs tests/editor-flow.test.mjs tests/layered-export.test.mjs tests/v03-render.test.mjs tests/v04-render.test.mjs tests/v05-render.test.mjs tests/v06-curve.test.mjs tests/v06-ui-edits.test.mjs tests/timeline-placement.test.mjs tests/preview-controller.test.mjs tests/srt.test.mjs tests/subtitle-import.test.mjs tests/v07-curve-audio.test.mjs tests/v07-effects.test.mjs tests/v07-waveform.test.mjs tests/v08-curve-audio.test.mjs tests/v08-effects.test.mjs tests/v08-audio.test.mjs tests/v08-audio-export.test.mjs tests/v09-audio.test.mjs tests/v09-easing.test.mjs tests/v09-effects.test.mjs",
+    "desktop:prepare": "npm run audio-helper:build && npm run build && node scripts/prepare-desktop.mjs",
+    "desktop:dev": "npm run desktop:prepare && electron .desktop-build/app",
+    "desktop:package": "npm run desktop:prepare && electron-builder --config desktop/electron-builder.cjs --mac --arm64 && node scripts/finalize-desktop.mjs && npm run desktop:verify",
+    "test:desktop": "node --test tests/desktop-runtime.test.mjs desktop/library.test.mjs",
+    "test:all": "node --test tests/*.test.mjs desktop/library.test.mjs",
+    "desktop:verify": "node scripts/verify-desktop-package.mjs",
+    "audio-helper:build": "node scripts/build-audio-helper.mjs"
+  },
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@ffprobe-installer/ffprobe": "^2.1.2",
+    "@phosphor-icons/react": "^2.1.10",
+    "@vitejs/plugin-react": "5.0.4",
+    "express": "^5.2.1",
+    "multer": "^2.4.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "vite": "6.4.2"
+  },
+  "devDependencies": {
+    "electron": "44.8.0",
+    "electron-builder": "26.15.3",
+    "esbuild": "0.28.2"
+  }
+}
